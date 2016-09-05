@@ -1,5 +1,8 @@
 from tornado import websocket, web, ioloop
+import tornado
 import json
+import requests
+import boto3
 
 cl = []
 
@@ -24,25 +27,37 @@ class ApiHandler(web.RequestHandler):
     @web.asynchronous
     def get(self, *args):
         self.finish()
-        id = self.get_argument("id")
-        value = self.get_argument("value")
-        data = {"id": id, "value" : value}
+        subject = self.get_argument("subject")
+        message = self.get_argument("message")
+        data = {"subject": subject, "message" : message}
         data = json.dumps(data)
         for c in cl:
             c.write_message(data)
 
     @web.asynchronous
-    def post(self):
-        pass
+    def post(self, *args, **kwargs):
+        data = tornado.escape.json_decode(self.request.body)
+        headers = self.request.headers
+        message_type = headers['x-amz-sns-message-type']
+
+        if message_type == 'SubscriptionConfirmation':
+            pass
+        elif message_type == 'Notification':
+            pass
+        elif message_type == 'UnsubscribeConfirmation':
+            pass
+        else:
+            pass
+        self.set_status(200)
 
 app = web.Application([
     (r'/', IndexHandler),
     (r'/ws', SocketHandler),
-    (r'/api', ApiHandler),
+    (r'/sns', ApiHandler),
     (r'/(favicon.ico)', web.StaticFileHandler, {'path': '../'}),
     (r'/(rest_api_example.png)', web.StaticFileHandler, {'path': './'}),
 ])
 
 if __name__ == '__main__':
-    app.listen(8888)
+    app.listen(8000)
     ioloop.IOLoop.instance().start()
