@@ -3,11 +3,17 @@ import tornado
 import json
 import requests
 import boto3
+from datetime import datetime
+from pprint import pprint
 
 cl = []
 
 class IndexHandler(web.RequestHandler):
     def get(self):
+        time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        r = self.request
+        log_msg = '{} - [{}] {} {} {} {}'.format(r.remote_ip, time, r.method, r.path, r.version, self.get_status())
+        print(log_msg)
         self.render("index.html")
 
 class SocketHandler(websocket.WebSocketHandler):
@@ -26,10 +32,12 @@ class ApiHandler(web.RequestHandler):
 
     @web.asynchronous
     def get(self, *args):
+        self.write('OK')
         self.finish()
-        subject = self.get_argument("id")
-        message = self.get_argument("value")
-        data = {"id": subject, "value" : message}
+        subject = self.get_argument("subject")
+        message = self.get_argument("message")
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        data = {"subject": subject, "message" : message, "timestamp": timestamp}
         data = json.dumps(data)
         for c in cl:
             c.write_message(data)
@@ -72,12 +80,30 @@ class ApiHandler(web.RequestHandler):
         self.set_status(200)
         self.finish()
 
+
+class PublishAmazonSNS(web.RequestHandler):
+
+    @web.asynchronous
+    def get(self, *args):
+        self.write('Currently, we don\'t have the amazon key!')
+        self.finish()
+        subject = self.get_argument("subject")
+        message = self.get_argument("message")
+        data = {'Subject': subject, 'Message': message}
+        topic_arn = 'your_topic_arn'
+        sns = boto3.resource('sns')
+        topic = sns.Topic(topic_arn)
+        res = topic.publish(**data)
+        pprint(res)
+
 app = web.Application([
     (r'/', IndexHandler),
     (r'/ws', SocketHandler),
     (r'/sns', ApiHandler),
+    (r'/publish', PublishAmazonSNS),
     (r'/(favicon.ico)', web.StaticFileHandler, {'path': '../'}),
     (r'/(rest_api_example.png)', web.StaticFileHandler, {'path': './'}),
+    (r'/(reconnecting-websocket.min.js)', web.StaticFileHandler, {'path': './'}),
 ])
 
 if __name__ == '__main__':
