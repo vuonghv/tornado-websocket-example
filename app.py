@@ -7,6 +7,7 @@ from datetime import datetime
 from pprint import pprint
 
 cl = []
+TOPIC_ARN = 'your_amazon_sns_topic_arn'
 
 class IndexHandler(web.RequestHandler):
     def get(self):
@@ -44,6 +45,8 @@ class ApiHandler(web.RequestHandler):
 
     @web.asynchronous
     def post(self, *args, **kwargs):
+        self.set_status(200)
+        self.finish()
         data = tornado.escape.json_decode(self.request.body)
         headers = self.request.headers
         message_type = headers['x-amz-sns-message-type']
@@ -77,23 +80,23 @@ class ApiHandler(web.RequestHandler):
         else:
             print('Don\'t understand this header: {}'.format(message_type))
 
-        self.set_status(200)
-        self.finish()
-
 
 class PublishAmazonSNS(web.RequestHandler):
 
     @web.asynchronous
     def get(self, *args):
-        self.write('Currently, we don\'t have the amazon key!')
-        self.finish()
-        subject = self.get_argument("subject")
-        message = self.get_argument("message")
-        data = {'Subject': subject, 'Message': message}
-        topic_arn = 'your_topic_arn'
-        sns = boto3.resource('sns')
-        topic = sns.Topic(topic_arn)
-        res = topic.publish(**data)
+        try:
+            subject = self.get_argument("subject")
+            message = self.get_argument("message")
+            data = {'Subject': subject, 'Message': message}
+            sns = boto3.resource('sns')
+            topic = sns.Topic(TOPIC_ARN)
+            res = topic.publish(**data)
+        except Exception as e:
+            self.write('You need to configure Amazon Key!')
+            raise e
+        finally:
+            self.finish()
         pprint(res)
 
 app = web.Application([
@@ -101,7 +104,7 @@ app = web.Application([
     (r'/ws', SocketHandler),
     (r'/sns', ApiHandler),
     (r'/publish', PublishAmazonSNS),
-    (r'/(favicon.ico)', web.StaticFileHandler, {'path': '../'}),
+    (r'/(favicon.ico)', web.StaticFileHandler, {'path': './'}),
     (r'/(rest_api_example.png)', web.StaticFileHandler, {'path': './'}),
     (r'/(reconnecting-websocket.min.js)', web.StaticFileHandler, {'path': './'}),
 ])

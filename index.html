@@ -2,6 +2,8 @@
 <html>
 <head>
   <title>Amazon SNS using Tornado</title>
+  <link rel="SHORTCUT ICON" href="./favicon.ico" />
+  <link ref="icon" href="./favicon.ico" type="image/ico" />
   <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
   <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <script type="text/javascript" src="./reconnecting-websocket.min.js"></script>
@@ -26,15 +28,15 @@
 
     <hr>
     <h3>Publish message to Amazon SNS</h3>
-    <p>GET /publish (Currently we don't have right Amazon SNS key):  <pre>http://mangxa.framgia.vn/publish?subject=how_are_you&message=Do_you_know_whoami</pre></p>
+    <p>GET /publish (You need to config Amazon key and TOPIC_ARN):  <pre>http://localhost:8000/publish?subject=how_are_you&message=do_you_know_whoami</pre></p>
     <hr>
-    <h3>Test Tornaldo WebSocket</h3>
-    <p>GET /sns: <pre>http://mangxa.framgia.vn/sns?subject=how_are_you&message=Do_you_know_whoami</pre></p>
+    <h3>Test Tornado WebSocket</h3>
+    <p>GET /sns: <pre>http://localhost:8000/sns?subject=how_are_you&message=do_you_know_whoami</pre></p>
     <hr>
     <img src="./rest_api_example.png"/>
   </div>
   <script>
-    var socket_url = 'ws://mangxa.framgia.vn/ws';
+    var socket_url = 'ws://localhost:8000/ws';
     //var ws = new WebSocket(socket_url);
     ws = new ReconnectingWebSocket(socket_url);
     var $message = $('#message');
@@ -52,9 +54,11 @@
       $message.text('recieved message');
 
       var json = JSON.parse(ev.data);
-      var row = '<tr><td>'+window.row_id+'</td><td>'+json.subject+'</td><td>'+json.message+'</td><td>'+json.timestamp+'</td></tr>'
+      var $row = $('<tr><td>'+window.row_id+'</td><td>'+json.subject+'</td><td>'+json.message+'</td><td>'+json.timestamp+'</td></tr>')
       window.row_id += 1;
-      $('#notify').append(row)
+      $('#notify').append($row)
+      $row.hide();
+      $row.fadeIn("slow");
     };
 
     ws.onclose = function(ev){

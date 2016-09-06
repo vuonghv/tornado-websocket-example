@@ -1,59 +1,60 @@
-# Tornado WebSocket example
+# Amazone SNS using Tornado WebSocket
 
-This is a websocket example written in python.
+Display messages (published from AWS SNS) by using Tornado WebSocket
+
+## Preconfiguration
+Setting your Amazon credentials for Boto 3. You ONLY need this settings if you
+want to publish messages to AWS SNS Topic through bellow REST API.
+Make sure your key have permission to publish message.
+
+1. Create the credential file, its default location is at `$HOME/.aws/credentials`:
+
+```
+[default]
+aws_access_key_id = YOUR_ACCESS_KEY
+aws_secret_access_key = YOUR_SECRET_KEY
+```
+2. Set a default region, its location is at `$HOME/.aws/config`:
+
+```
+[default]
+region=us-east-2
+```
 
 ## Installation
 
-1. `git clone https://github.com/hiroakis/tornado-websocket-example.git`
+1. `git clone https://github.com/vuonghv/sns-tornado-websocket.git`
 
-2. `cd tornado-websocket-example`
+2. `cd sns-tornado-websocket`
 
-3. Edit index.html
+3. Edit `index.html`: `var socket_url = 'ws://localhost:8000/ws` <- change to your url/localhost
 
-`var ws = new WebSocket('ws://hiroakis.com:8888/ws'` <- change to your url/localhost
+4. (Optional) If you want to publish message to AWS SNS, then config `TOPIC_ARN` in file `app.py`
 
-4. `pip install -r requirements.txt`
+5. `pip install -r requirements.txt`
 
-5. `python app.py`
+6. `python app.py`
 
-6. http://YourSite:8888/
-(This is my demo page -> http://hiroakis.com:8888/)
+7. Visit: `http://localhost:8000/`
+(This is demo page -> http://mangxa.framgia.vn/)
 
-7. Send a REST call:
+8. Make some below GET requests to see the magics. :)
 
-## Docker
-
-You can create demo server using docker.
-
-* build
-
-```
-docker build -t hiroakis/tornade-websocket-example .
-docker run -d -p 8888:8888 hiroakis/tornade-websocket-example
-```
-
-or
-
-* pull from docker hub
-
-```
-docker pull hiroakis/tornado-websocket-example
-docker run -d -p 8888:8888 hiroakis/tornade-websocket-example
-```
 
 ## REST API examples
 
-Set the "id 1" value to 100 :
-- `curl "http://hiroakis.com:8888/api?id=1&value=100"`
+* **Publish message to Amazon SNS**
 
-Set the "id 1" value to 300( The row No 1 will change to yellow ) :
-- `curl "http://hiroakis.com:8888/api?id=1&value=300"`
+GET /publish: `http://localhost:8000/publish?subject=who_are_you&message=do_you_know_whoami`
 
-Set The "id 1" value to 600( The row No 1 will change to red ):
-- `curl "http://hiroakis.com:8888/api?id=1&value=600"`
+* **Test Tornado WebSocket**
 
-- value 201 - 500 : change to yellow
-- value 501 - : change to red
+GET /sns: `http://localhost:8000/sns?subject=who_are_you&message=do_you_know_whoami`
+
+
+## Thanks
+
+* [hiroakis](https://github.com/hiroakis/tornado-websocket-example) for a greate example of Tornado WebSocket.
 
 ## License
 
