@@ -27,9 +27,9 @@ class ApiHandler(web.RequestHandler):
     @web.asynchronous
     def get(self, *args):
         self.finish()
-        subject = self.get_argument("subject")
-        message = self.get_argument("message")
-        data = {"subject": subject, "message" : message}
+        subject = self.get_argument("id")
+        message = self.get_argument("value")
+        data = {"id": subject, "value" : message}
         data = json.dumps(data)
         for c in cl:
             c.write_message(data)
@@ -41,14 +41,36 @@ class ApiHandler(web.RequestHandler):
         message_type = headers['x-amz-sns-message-type']
 
         if message_type == 'SubscriptionConfirmation':
-            pass
+            print('Receive subscription confirmation from {}'.format(h['x-amz-sns-topic-arn']))
+            pprint(data)
+            print('Sending confirmation...')
+            res = requests.get(data['SubscribeURL'])
+            print('Confirmation: Done, status: {}'.format(res.status_code))
+
         elif message_type == 'Notification':
-            pass
+            print('Receive notification')
+            print('TopicArn: {}'.format(data['TopicArn']))
+            print('Subject: {}'.format(data['Subject']))
+            print('Message: {}'.format(data['Message']))
+            print('Timestamp: {}'.format(data['Timestamp']))
+            # push the message to clients
+            msg = {
+                'subject': data['Subject'],
+                'message': data['Message'],
+                'timestamp': data['Timestamp']
+            }
+            msg = json.dumps(msg)
+            for c in cl:
+                c.write_message(msg)
+
         elif message_type == 'UnsubscribeConfirmation':
-            pass
+            print('Receive UnsubscribeConfirmation')
+
         else:
-            pass
+            print('Don\'t understand this header: {}'.format(message_type))
+
         self.set_status(200)
+        self.finish()
 
 app = web.Application([
     (r'/', IndexHandler),
@@ -59,5 +81,7 @@ app = web.Application([
 ])
 
 if __name__ == '__main__':
-    app.listen(8000)
+    address = '0.0.0.0'
+    port = 8000
+    app.listen(port, address)
     ioloop.IOLoop.instance().start()

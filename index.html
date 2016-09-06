@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>tornado WebSocket example</title>
+  <title>Amazon SNS using Tornado</title>
   <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
   <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>tornado WebSocket</h1>
+    <h1>Amazon SNS using Tornado websocket</h1>
     <hr>
       WebSocket status : <span id="message"></span>
     <hr>
@@ -85,7 +85,7 @@
   </div>
   <script>
     //var ws = new WebSocket('ws://curama.framgia.vn:8000/ws');
-    var ws = new WebSocket('ws://localhost:8000/ws');
+    var ws = new WebSocket('ws://curama.framgia.vn:8000/ws');
     var $message = $('#message');
 
     ws.onopen = function(){
